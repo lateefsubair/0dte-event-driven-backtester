@@ -1,0 +1,14 @@
+# CMake build directories
+cmake-build-*/
+
+# CLion / JetBrains
+.idea/
+
+# Compiled files
+*.o
+*.obj
+*.exe
+
+# Performance/profiling output
+perf.data
+perf.data.old
