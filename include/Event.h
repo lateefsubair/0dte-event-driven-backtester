@@ -8,4 +8,11 @@ enum class EventType {
     FILL
 };
 
+class Event {
+public:
+    virtual ~Event() = default;
+
+    virtual EventType getType() const = 0;
+};
+
 #endif

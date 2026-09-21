@@ -4,16 +4,16 @@
 #include <queue>
 #include <memory>
 
-#include "MarketEvent.h"
+#include "Event.h"
 
 class EventQueue {
 private:
-    std::queue<std::shared_ptr<MarketEvent>> events;
+    std::queue<std::shared_ptr<Event>> events;
 
 public:
-    void push(const std::shared_ptr<MarketEvent>& event);
+    void push(const std::shared_ptr<Event>& event);
 
-    std::shared_ptr<MarketEvent> pop();
+    std::shared_ptr<Event> pop();
 
     bool empty() const;
 

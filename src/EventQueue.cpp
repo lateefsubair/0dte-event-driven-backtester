@@ -1,10 +1,10 @@
 #include "EventQueue.h"
 
-void EventQueue::push(const std::shared_ptr<MarketEvent>& event) {
+void EventQueue::push(const std::shared_ptr<Event>& event) {
     events.push(event);
 }
 
-std::shared_ptr<MarketEvent> EventQueue::pop() {
+std::shared_ptr<Event> EventQueue::pop() {
     if (events.empty()) {
         return nullptr;
     }
