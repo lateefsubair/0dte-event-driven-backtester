@@ -1,14 +1,81 @@
 # Event-Driven Backtesting Engine
 
-This project is a C++20 event-driven backtesting engine for intraday market data.
+This project is a C++ event-driven backtesting engine for intraday quantitative research.
 
-I built it as the next step after working on the market-data side of quantitative finance in C++. The focus here is not on finding an optimized trading strategy. The focus is the infrastructure underneath a backtest: processing market events chronologically, generating signals, creating orders, simulating execution, updating a portfolio and measuring performance without accidentally using information from the future.
+I built it as the next step after working on the market-data side of quantitative finance in C++. The focus here is not on finding an optimized trading strategy. The focus is the infrastructure underneath a backtest: processing market data in the correct order, generating signals, creating orders, simulating execution, updating a portfolio and measuring performance without accidentally using information from the future.
 
-The current validation run starts with 1,000,000 SPY trades, aggregates them into 5-minute bars and runs those bars through the complete backtesting pipeline.
+The complete pipeline is:
+
+```text
+Raw Trades
+    ↓
+5-Minute OHLCV Bars
+    ↓
+MarketEvent
+    ↓
+SignalEvent
+    ↓
+OrderEvent
+    ↓
+Next-Bar Execution
+    ↓
+FillEvent
+    ↓
+Portfolio / Trades
+    ↓
+Performance Analytics
+```
+
+## Key Features
+
+The current implementation includes:
+
+- raw high-frequency trade ingestion
+- chronological-order validation
+- 5-minute OHLCV aggregation
+- volume-conservation checks
+- event-driven market processing
+- strategy-generated signals
+- portfolio-generated orders
+- next-bar execution
+- commissions and adverse slippage
+- pre-trade cash validation
+- mark-to-market portfolio accounting
+- completed-trade tracking
+- equity-curve construction
+- portfolio and trade-level performance statistics
+- comparison with a SPY price buy-and-hold benchmark
+
+The event system uses separate `MarketEvent`, `SignalEvent`, `OrderEvent` and `FillEvent` objects. This keeps market information, strategy decisions, trading instructions and actual executions separate.
+
+## Validation Snapshot
+
+I validated the engine using a high-frequency SPY dataset containing 1,000,000 trades.
+
+The final data pipeline produced:
+
+```text
+Raw SPY Trades:       1,000,000
+Out-of-Order Trades:          0
+5-Minute Bars:                78
+Raw Trade Volume:     64,392,783
+Aggregated Volume:    64,392,783
+Completed Trades:             18
+```
+
+The raw-trade and aggregated-bar volumes match exactly. I use this as a direct check that volume was preserved when the 1,000,000 individual trades were converted into 5-minute bars.
+
+Another important validation involved execution timing.
+
+During development, I found that an earlier order could effectively execute using a market price from a later event. The program ran normally and the resulting prices looked reasonable, but the timing was wrong.
+
+I changed the event-processing logic and then implemented next-bar execution. If the strategy observes completed bar `t` and generates an order from that information, the order remains pending until bar `t+1` arrives. It then executes using the open of bar `t+1`.
+
+This prevents the strategy from observing a completed bar and then pretending it traded before that information was available.
 
 ## What the Engine Does
 
-At a high level:
+At a more detailed level, the engine works like this:
 
 ```text
 Raw SPY Trades
@@ -53,23 +120,6 @@ Portfolio / Trade
 PerformanceAnalyzer
 ```
 
-The current implementation includes:
-
-- raw SPY trade ingestion
-- chronological-order validation
-- 5-minute OHLCV aggregation
-- volume-conservation checks
-- event-driven market processing
-- strategy-generated signals
-- portfolio-generated orders
-- next-bar execution
-- commissions and adverse slippage
-- pre-trade cash validation
-- mark-to-market portfolio accounting
-- completed-trade tracking
-- equity-curve construction
-- portfolio and trade-level performance statistics
-- comparison with a SPY price buy-and-hold benchmark
 
 ## Why I Built It
 
